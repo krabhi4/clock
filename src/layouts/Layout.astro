@@ -12,6 +12,70 @@
   </body>
 </html>
 
+<script is:inline>
+  // Dynamic favicon clock functionality
+  function updateFavicon() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    // Calculate angles for clock hands
+    const hourAngle = (hours % 12) * 30 + (minutes / 60) * 30; // 30 degrees per hour + minute adjustment
+    const minuteAngle = minutes * 6 + (seconds / 60) * 6; // 6 degrees per minute + second adjustment
+    const secondAngle = seconds * 6; // 6 degrees per second
+
+    // Convert angles to radians
+    const hourRad = ((hourAngle - 90) * Math.PI) / 180;
+    const minuteRad = ((minuteAngle - 90) * Math.PI) / 180;
+    const secondRad = ((secondAngle - 90) * Math.PI) / 180;
+
+    // Calculate hand positions with different lengths
+    // Hour hand: shortest (radius 5), Minute hand: medium (radius 7), Second hand: longest (radius 9)
+    const hourX = 16 + 5 * Math.cos(hourRad);
+    const hourY = 16 + 5 * Math.sin(hourRad);
+    const minuteX = 16 + 7 * Math.cos(minuteRad);
+    const minuteY = 16 + 7 * Math.sin(minuteRad);
+    const secondX = 16 + 9 * Math.cos(secondRad);
+    const secondY = 16 + 9 * Math.sin(secondRad);
+
+    // Create new SVG with updated hand positions
+    const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="15" fill="white" stroke="#333" stroke-width="2"/>
+      <line x1="16" y1="16" x2="${hourX}" y2="${hourY}" stroke="#333" stroke-width="3" stroke-linecap="round"/>
+      <line x1="16" y1="16" x2="${minuteX}" y2="${minuteY}" stroke="#333" stroke-width="2" stroke-linecap="round"/>
+      <line x1="16" y1="16" x2="${secondX}" y2="${secondY}" stroke="#ff0000" stroke-width="1" stroke-linecap="round"/>
+      <circle cx="16" cy="16" r="1" fill="#333"/>
+      <style>
+        @media (prefers-color-scheme: dark) {
+          circle { fill: #222; stroke: #fff; }
+          line { stroke: #fff; }
+          line:last-of-type { stroke: #ff4444; }
+          circle:last-child { fill: #fff; }
+        }
+      </style>
+    </svg>`;
+
+    // Update favicon
+    const favicon = document.querySelector('link[rel="icon"]');
+    if (favicon) {
+      const blob = new Blob([svgContent], { type: "image/svg+xml" });
+      const url = URL.createObjectURL(blob);
+      favicon.href = url;
+
+      // Clean up previous URL to prevent memory leaks
+      if (favicon.dataset.previousUrl) {
+        URL.revokeObjectURL(favicon.dataset.previousUrl);
+      }
+      favicon.dataset.previousUrl = url;
+    }
+  }
+
+  // Update favicon immediately and then every second
+  updateFavicon();
+  setInterval(updateFavicon, 1000);
+</script>
+
 <style is:global>
   body {
     padding: 0;
