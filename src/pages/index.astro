@@ -10,6 +10,8 @@ import Layout from "../layouts/Layout.astro";
     <div></div>
     <div></div>
     <div></div>
+    <div></div>
+    <div></div>
   </div>
 </Layout>
 
@@ -285,6 +287,88 @@ import Layout from "../layouts/Layout.astro";
     ],
   ];
 
+  // Letter patterns matching your drawing (4 cols x 6 rows = 24 clocks)
+  const letters = {
+    A: [
+      BR,
+      H,
+      H,
+      BL,
+      V,
+      E,
+      E,
+      V,
+      V,
+      BR,
+      BL,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      TR,
+      TL,
+      TR,
+      TL,
+    ],
+    M: [
+      BR,
+      H,
+      H,
+      BL,
+      V,
+      BR,
+      BL,
+      V,
+      V,
+      TR,
+      TL,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      V,
+      TR,
+      TL,
+      TR,
+      TL,
+    ],
+    P: [
+      BR,
+      H,
+      H,
+      BL,
+      V,
+      E,
+      E,
+      V,
+      V,
+      BR,
+      H,
+      TL,
+      V,
+      V,
+      E,
+      E,
+      V,
+      V,
+      E,
+      E,
+      TR,
+      TL,
+      E,
+      E,
+    ],
+  };
+
   const normalizeAngle = (next, prev) => {
     const delta = (((next - prev) % 360) + 360) % 360;
     return prev + delta;
@@ -292,20 +376,32 @@ import Layout from "../layouts/Layout.astro";
 
   const getTimeDigits = () => {
     const now = new Date();
-    return [now.getHours(), now.getMinutes(), now.getSeconds()].flatMap((val) =>
+    let hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+
+    // Convert to 12-hour format
+    hours = hours % 12;
+    if (hours === 0) hours = 12;
+
+    return [hours, minutes, seconds].flatMap((val) =>
       String(val).padStart(2, "0").split("").map(Number)
     );
+  };
+
+  const getAMPMSegments = () => {
+    const now = new Date();
+    const isPM = now.getHours() >= 12;
+    return isPM ? ["P", "M"] : ["A", "M"];
   };
 
   const randomAngle = () => Math.floor(Math.random() * 360);
 
   class ClockManager {
     constructor() {
-      console.log("Initializing ClockManager");
       this.clockData = [];
       this.initial = true;
       this.app = document.getElementById("clock-app");
-      console.log("Found app element:", this.app);
       this.initializeClocks();
       this.startClock();
     }
@@ -317,14 +413,23 @@ import Layout from "../layouts/Layout.astro";
       }
       const containers = this.app.querySelectorAll("div");
       console.log("Found containers:", containers.length);
+      console.log("Containers:", containers);
+
       containers.forEach((container, digitIndex) => {
+        console.log(`Initializing segment ${digitIndex}`);
         this.clockData[digitIndex] = [];
+
+        // Clean layout - no debugging colors
+
         for (let i = 0; i < 24; i++) {
           const clock = document.createElement("div");
           clock.className = "clock";
           clock.style.setProperty("--hour-angle", String(randomAngle()));
           clock.style.setProperty("--minute-angle", String(randomAngle()));
           clock.style.setProperty("--dur", "1");
+
+          // All clocks use same styling
+
           container.appendChild(clock);
 
           this.clockData[digitIndex][i] = {
@@ -333,7 +438,23 @@ import Layout from "../layouts/Layout.astro";
             prevM: 0,
           };
         }
+
+        // Verify all 24 clocks were created
+        const actualClocks = container.querySelectorAll(".clock");
+        console.log(
+          `Segment ${digitIndex}: Created ${actualClocks.length} clocks`
+        );
+        if (actualClocks.length !== 24) {
+          console.error(
+            `Segment ${digitIndex} only has ${actualClocks.length} clocks instead of 24!`
+          );
+        }
+        console.log(
+          `Segment ${digitIndex} initialized with ${this.clockData[digitIndex].length} clocks`
+        );
       });
+
+      console.log("Total segments initialized:", this.clockData.length);
     }
 
     updateClocks() {
@@ -363,9 +484,56 @@ import Layout from "../layouts/Layout.astro";
           clockInfo.prevM = minuteAngle;
         });
       });
+
+      // Update AM/PM segments with correct letters
+      const ampmSegments = getAMPMSegments();
+
+      ampmSegments.forEach((letter, letterIndex) => {
+        const segmentIndex = 6 + letterIndex; // segments 6 and 7
+
+        if (!this.clockData[segmentIndex] || !letters[letter]) {
+          return;
+        }
+
+        const letterPattern = letters[letter];
+
+        // Apply the letter pattern to this segment
+        for (let i = 0; i < 24; i++) {
+          if (this.clockData[segmentIndex][i] && letterPattern[i]) {
+            const { h, m } = letterPattern[i];
+            const hourAngle = normalizeAngle(
+              h,
+              this.clockData[segmentIndex][i].prevH
+            );
+            const minuteAngle = normalizeAngle(
+              m,
+              this.clockData[segmentIndex][i].prevM
+            );
+
+            this.clockData[segmentIndex][i].element.style.setProperty(
+              "--hour-angle",
+              String(this.initial ? randomAngle() : hourAngle)
+            );
+            this.clockData[segmentIndex][i].element.style.setProperty(
+              "--minute-angle",
+              String(this.initial ? randomAngle() : minuteAngle)
+            );
+            this.clockData[segmentIndex][i].element.style.setProperty(
+              "--dur",
+              "0.4"
+            );
+
+            this.clockData[segmentIndex][i].prevH = hourAngle;
+            this.clockData[segmentIndex][i].prevM = minuteAngle;
+          }
+        }
+      });
     }
 
     startClock() {
+      // Initial update to set correct positions
+      this.updateClocks();
+
       setTimeout(() => {
         this.initial = false;
       }, 600);

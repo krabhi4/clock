@@ -25,9 +25,9 @@
   }
 
   .app {
-    --clock-size: 3vw;
+    --clock-size: 2.3vw;
     --gap: calc(var(--clock-size) * 0.05);
-    --clock-segment-w: calc(var(--clock-size) * 4 + var(--gap) * 5);
+    --clock-segment-w: calc(var(--clock-size) * 4 + var(--gap) * 3);
     --clock-segment-h: calc(var(--clock-size) * 6 + var(--gap) * 5);
     font-family: sans-serif;
     text-align: center;
@@ -36,7 +36,7 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    padding-left: calc(var(--clock-size) + var(--gap) * 2);
+    padding: 0;
   }
 
   .app > div {
@@ -47,8 +47,22 @@
     height: var(--clock-segment-h);
   }
 
-  .app > div:nth-of-type(even) {
+  .app > div:nth-of-type(2n) {
     margin-right: var(--clock-size);
+  }
+
+  /* Special spacing for AM/PM segments */
+  .app > div:nth-of-type(7) {
+    margin-left: calc(var(--clock-size) * 0.5);
+  }
+
+  /* Force correct layout for segments 6 and 7 */
+  .app > div:nth-of-type(7),
+  .app > div:nth-of-type(8) {
+    display: flex;
+    flex-wrap: wrap;
+    width: var(--clock-segment-w) !important;
+    height: var(--clock-segment-h) !important;
   }
 
   .clock {
