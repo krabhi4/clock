@@ -76,10 +76,45 @@
   setInterval(updateFavicon, 1000);
 </script>
 
+<script is:inline>
+  // Theme management
+  const theme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.contains('dark');
+    document.documentElement.classList.toggle('dark', !isDark);
+    localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+  }
+
+  // Expose toggleTheme to global for button
+  window.toggleTheme = toggleTheme;
+</script>
+
 <style is:global>
+  :root {
+    --bg-color: white;
+    --clock-border: white;
+    --clock-bg: linear-gradient(225deg, #d0d0d0 10%, white);
+    --clock-shadow1: -2px 2px 6px #d0d0d0;
+    --clock-shadow2: 2px -2px 6px #ffffff;
+    --hand-color: black;
+  }
+
+  .dark {
+    --bg-color: #1a1a1a;
+    --clock-border: #333;
+    --clock-bg: linear-gradient(225deg, #333 10%, #1a1a1a);
+    --clock-shadow1: -2px 2px 6px #000;
+    --clock-shadow2: 2px -2px 6px #333;
+    --hand-color: white;
+  }
+
   body {
     padding: 0;
     margin: 0;
+    background: var(--bg-color);
+    transition: background 0.3s ease;
   }
 
   *,
@@ -138,11 +173,10 @@
     height: var(--clock-size);
     border-radius: 50%;
     flex-shrink: 0;
-    border: 2px solid white;
-    background: linear-gradient(225deg, #d0d0d0 10%, white);
-    box-shadow:
-      -2px 2px 6px #d0d0d0,
-      2px -2px 6px #ffffff;
+    border: 2px solid var(--clock-border);
+    background: var(--clock-bg);
+    box-shadow: var(--clock-shadow1), var(--clock-shadow2);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .clock::before,
@@ -154,9 +188,9 @@
     transform-origin: 0% 50%;
     width: var(--w);
     height: var(--h);
-    background: black;
+    background: var(--hand-color);
     border-radius: 9999px;
-    transition: calc(var(--dur) * 1s) ease-in-out;
+    transition: calc(var(--dur) * 1s) ease-in-out, background 0.3s ease;
     transform: rotate(calc(var(--angle) * 1deg));
   }
 

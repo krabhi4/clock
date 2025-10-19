@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
+  <button id="theme-toggle" style="position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 8px 12px; background: var(--clock-bg); border: 1px solid var(--clock-border); border-radius: 4px; color: var(--hand-color); cursor: pointer; transition: all 0.3s ease;">🌙</button>
   <div class="app" id="clock-app">
     <div></div>
     <div></div>
@@ -558,4 +559,11 @@ import Layout from "../layouts/Layout.astro";
     // DOM is already loaded
     new ClockManager();
   }
+
+  // Theme toggle
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    window.toggleTheme();
+    const button = document.getElementById('theme-toggle');
+    button.textContent = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+  });
 </script>
