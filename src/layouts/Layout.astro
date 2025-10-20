@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
+    <meta id="theme-color" name="theme-color" content="#1a1a1a" />
     <title>Clock</title>
   </head>
   <body>
@@ -81,10 +82,22 @@
   const theme = localStorage.getItem('theme') || 'dark';
   document.documentElement.classList.toggle('dark', theme === 'dark');
 
+  function setThemeColorMeta(isDark) {
+    const meta = document.querySelector('meta#theme-color');
+    if (meta) {
+      // Match CSS variable values for body background in each theme
+      meta.setAttribute('content', isDark ? '#1a1a1a' : '#ffffff');
+    }
+  }
+
+  // Initialize theme-color meta to match current theme
+  setThemeColorMeta(theme === 'dark');
+
   function toggleTheme() {
     const isDark = document.documentElement.classList.contains('dark');
     document.documentElement.classList.toggle('dark', !isDark);
     localStorage.setItem('theme', !isDark ? 'dark' : 'light');
+    setThemeColorMeta(!isDark);
   }
 
   // Expose toggleTheme to global for button
@@ -110,10 +123,18 @@
     --hand-color: white;
   }
 
+  html {
+    padding: 0;
+    margin: 0;
+    background: var(--bg-color);
+    transition: background 0.3s ease;
+  }
+
   body {
     padding: 0;
     margin: 0;
     background: var(--bg-color);
+    background-color: var(--bg-color);
     transition: background 0.3s ease;
   }
 
@@ -134,7 +155,8 @@
     gap: var(--gap);
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    height: 100svh; /* ensure background fills safe viewport on mobile */
+    min-height: 100svh;
     padding: 0;
   }
 
