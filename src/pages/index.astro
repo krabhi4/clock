@@ -1,8 +1,23 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const seo = {
+  title: "Clock — Live time in analog clock grids",
+  description:
+    "A creative clock that displays the current time using grids of small analog clocks. Each digit is formed by 24 clocks—hour and minute hands spell out the time in real time. Light and dark theme, responsive.",
+  ogType: "website" as const,
+  structuredData: {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Clock",
+    description: "Live time display using grids of analog clocks that form digits and AM/PM.",
+    applicationCategory: "UtilitiesApplication",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+};
 ---
 
-<Layout>
+<Layout seo={seo}>
   <button id="theme-toggle" style="position: fixed; top: 10px; right: 10px; z-index: 1000; padding: 8px 12px; background: var(--clock-bg); border: 1px solid var(--clock-border); border-radius: 4px; color: var(--hand-color); cursor: pointer; transition: all 0.3s ease;">🌙</button>
   <div class="app" id="clock-app">
     <div></div>

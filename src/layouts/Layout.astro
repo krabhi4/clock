@@ -1,12 +1,118 @@
+---
+import { SITE, buildAbsoluteImageUrl, type PageSEO } from "../data/seo";
+
+interface Props {
+  seo?: PageSEO;
+}
+
+const { seo = {} } = Astro.props;
+const siteOrigin = SITE.origin || Astro.url.origin;
+const origin = siteOrigin;
+const canonicalUrl = seo.canonicalPath
+  ? new URL(seo.canonicalPath, origin).href
+  : (SITE.origin ? new URL(Astro.url.pathname + Astro.url.search, SITE.origin).href : Astro.url.href);
+
+const title = seo.title ?? SITE.title;
+const description = seo.description ?? SITE.description;
+const ogImage = buildAbsoluteImageUrl(seo.image ?? SITE.defaultOgImage, origin);
+const robots = seo.noindex ? "noindex, nofollow" : (seo.robots ?? SITE.robots);
+const ogType = seo.ogType ?? "website";
+
+const jsonLdWebSite = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE.name,
+  description: SITE.description,
+  url: origin,
+  potentialAction: {
+    "@type": "ReadAction",
+    target: { "@id": canonicalUrl },
+  },
+};
+
+const jsonLdWebPage = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: title,
+  description,
+  url: canonicalUrl,
+  isPartOf: { "@id": `${origin}/#website` },
+  about: {
+    "@type": "Thing",
+    name: "Analog clock grid time display",
+  },
+};
+
+const structuredData = [
+  jsonLdWebSite,
+  jsonLdWebPage,
+  ...(Array.isArray(seo.structuredData) ? seo.structuredData : seo.structuredData ? [seo.structuredData] : []),
+];
+---
+
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" id="theme-color" content="#1a1a1a" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Primary meta -->
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={SITE.keywords.join(", ")} />
+    {SITE.author && <meta name="author" content={SITE.author} />}
+    {SITE.copyright && <meta name="copyright" content={SITE.copyright} />}
+    <meta name="robots" content={robots} />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta name="generator" content={Astro.generator} />
-    <meta id="theme-color" name="theme-color" content="#1a1a1a" />
-    <title>Clock</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={SITE.locale} />
+    <meta property="og:image:alt" content={SITE.tagline} />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={SITE.tagline} />
+    {SITE.twitterHandle && <meta name="twitter:site" content={SITE.twitterHandle} />}
+
+    <!-- Locale alternates (if any) -->
+    {SITE.localeAlternates.map((locale) => (
+      <link rel="alternate" hreflang={locale} href={canonicalUrl} />
+    ))}
+
+    <!-- Mobile / format -->
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="application-name" content={SITE.name} />
+
+    <!-- Extra meta from page -->
+    {Object.entries(seo.extraMeta ?? {}).map(([key, value]) => {
+      const isProperty = key.startsWith("og:") || key.startsWith("twitter:");
+      return isProperty ? (
+        <meta property={key} content={value} />
+      ) : (
+        <meta name={key} content={value} />
+      );
+    })}
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)} />
   </head>
   <body>
     <slot />
