@@ -2,6 +2,8 @@
 
 **Live:** [https://clock.krabhi4.in](https://clock.krabhi4.in)
 
+![Clock Screenshot](./public/screenshot.png)
+
 A creative clock that displays the current time using grids of small analog clocks. Each digit (and AM/PM letters) is formed by 24 clocks arranged in a 4×6 grid—hour and minute hands are set to specific angles to form the shape of digits 0–9 and letters A, M, P.
 
 ## Features
@@ -39,13 +41,13 @@ A creative clock that displays the current time using grids of small analog cloc
 
 All commands are run from the project root. This project uses **pnpm**.
 
-| Command           | Action                                      |
-| :---------------- | :------------------------------------------ |
-| `pnpm install`    | Install dependencies                        |
-| `pnpm dev`        | Start dev server at `localhost:4321`        |
-| `pnpm build`      | Build for production to `./dist/`           |
-| `pnpm preview`    | Preview the production build locally        |
-| `pnpm astro ...`  | Run Astro CLI (e.g. `astro add`, `astro check`) |
+| Command          | Action                                          |
+| :--------------- | :---------------------------------------------- |
+| `pnpm install`   | Install dependencies                            |
+| `pnpm dev`       | Start dev server at `localhost:4321`            |
+| `pnpm build`     | Build for production to `./dist/`               |
+| `pnpm preview`   | Preview the production build locally            |
+| `pnpm astro ...` | Run Astro CLI (e.g. `astro add`, `astro check`) |
 
 ## SEO
 
