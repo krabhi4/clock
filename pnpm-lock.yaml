@@ -9,7 +9,7 @@ importers:
   .:
     dependencies:
       astro:
-        specifier: ^7.4.8
+        specifier: ^7.4.10
         version: 7.4.11(@types/node@24.5.2)(esbuild@0.28.2)(yaml@2.9.1)
     devDependencies:
       '@astrojs/ts-plugin':
