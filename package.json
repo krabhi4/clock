@@ -9,10 +9,10 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^7.4.8"
+    "astro": "^7.4.11"
   },
   "devDependencies": {
     "@astrojs/ts-plugin": "^1.11.0",
-    "wrangler": "^4.160.0"
+    "wrangler": "^4.160.1"
   }
 }
